@@ -85,7 +85,6 @@ async function writeJsonFile(filePath: string, data: any) {
             }
         }
     }
-}
  
      // Use process.cwd() to get the absolute path to the project root
      const projectRoot = process.cwd();
@@ -99,6 +98,8 @@ async function writeJsonFile(filePath: string, data: any) {
      await fs.writeFile(path.join(buildDir, 'radar-rules.js'), `(${toSource(radar)})`);
      await writeJsonFile(path.join(buildDir, 'maintainers.json'), maintainers);
      await writeJsonFile(path.join(buildDir, 'routes.json'), namespaces);
+}
+
 
  main().catch(error => {
      console.error('An error occurred during the build process:', error);
