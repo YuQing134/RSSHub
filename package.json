@@ -21,6 +21,7 @@
         "lib"
     ],
     "scripts": {
+      "prebuild": "git init && git add . && git commit -m 'Init' || echo 'Git commit skipped'",
         "build": "tsx scripts/workflow/build-routes.ts",
         "build:docs": "tsx scripts/workflow/build-docs.ts",
         "dev": "cross-env NODE_ENV=dev tsx watch --inspect --clear-screen=false lib/index.ts",
