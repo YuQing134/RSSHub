@@ -3,6 +3,9 @@ import { directoryImport } from 'directory-import';
 import { Hono, type Handler } from 'hono';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+
+import fs from 'node:fs';
+
 import { serveStatic } from '@hono/node-server/serve-static';
 import { config } from '@/config';
 
@@ -26,20 +29,35 @@ let namespaces: Record<
     }
 > = {};
 
-switch (process.env.NODE_ENV) {
-    case 'test':
-    case 'production':
-        // @ts-expect-error
-        namespaces = await import('../assets/build/routes.json');
-        break;
-    default:
-        modules = directoryImport({
-            targetDirectoryPath: path.join(__dirname, './routes'),
-            importPattern: /\.ts$/,
-        }) as typeof modules;
+async function loadNamespaces() {
+     switch (process.env.NODE_ENV) {
+         case 'test':
+         case 'production':
+             try {
+                 const routesPath = path.join(process.cwd(), 'assets', 'build', 'routes.json');
+                 if (fs.existsSync(routesPath)) {
+                     const routesContent = await fs.promises.readFile(routesPath, 'utf-8');
+                     namespaces = JSON.parse(routesContent);
+                 } else {
+                     console.warn('routes.json not found. Falling back to directory import.');
+                     await loadModules();
+                 }
+             } catch (error) {
+                 console.error('Error loading routes.json:', error);
+                 await loadModules();
+             }
+             break;
+        default:
+             await loadModules();
+    }
 }
 
-if (Object.keys(modules).length) {
+ async function loadModules() {
+     modules = directoryImport({
+         targetDirectoryPath: path.join(__dirname, './routes'),
+         importPattern: /\.ts$/,
+     }) as typeof modules;
+ 
     for (const module in modules) {
         const content = modules[module] as
             | {
@@ -80,6 +98,8 @@ if (Object.keys(modules).length) {
         }
     }
 }
+
+await loadNamespaces();
 
 export { namespaces };
 
