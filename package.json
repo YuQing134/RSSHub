@@ -21,6 +21,9 @@
         "lib"
     ],
     "scripts": {
+     
+  "prebuild": "git init && git config user.email '1348786232@qq.com' && git config user.name 'Heroku' && git add . && git commit -m 'Initial commit'",
+      
         "build": "tsx scripts/workflow/build-routes.ts",
         "build:docs": "tsx scripts/workflow/build-docs.ts",
         "dev": "cross-env NODE_ENV=dev tsx watch --inspect --clear-screen=false lib/index.ts",
